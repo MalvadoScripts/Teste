@@ -1,0 +1,456 @@
+local player = game.Players.LocalPlayer
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "malvado_scripts", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+
+local Tab = Window:MakeTab({
+    Name = "Tab 1",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+    Name = "LocalPlayer"
+})
+
+OrionLib:MakeNotification({
+    Name = "Welcome!",
+    Content = "Welcome to my hub!",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+
+Tab:AddButton({
+    Name = "High Speed",
+    Text = "High Speed",
+    Function = function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 500
+    end
+})
+  
+
+Tab:AddButton({
+    Name = "High Jumppower",
+    Callback = function()
+        player.Character.Humanoid.JumpPower = 100
+    end
+})
+
+Tab:AddButton({
+    Name = "Low Gravity",
+    Callback = function()
+        game.Workspace.Gravity = 10
+    end
+})
+
+local isInvisible = false
+
+Tab:AddButton({
+    Name = "invisibilidade",
+    Callback = function()
+        isInvisible = not isInvisible
+        for _, part in pairs(player.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = isInvisible and 1 or 0
+                part.CanCollide = not isInvisible
+            elseif part:IsA("Accessory") then
+                part.Handle.Transparency = isInvisible and 1 or 0
+            end
+        end
+    end
+})
+
+Tab:AddButton({
+    Name = "atravessar paredes",
+    Callback = function()
+        for _, part in pairs(player.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+        game:GetService("RunService").Stepped:Connect(function()
+            for _, part in pairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") and part.Position.Y < 0 then
+                    part.CanCollide = true
+                end
+            end
+        end)
+    end
+})
+
+Tab:AddButton({
+    Name = "Btools",
+    Callback = function()
+        local tool = Instance.new("HopperBin", player.Backpack)
+        tool.BinType = Enum.BinType.Hammer
+        local deleteTool = Instance.new("HopperBin", player.Backpack)
+        deleteTool.BinType = Enum.BinType.Clone
+    end
+})
+
+Tab:AddButton({
+    Name = "parar tempo",
+    Callback = function()
+        local players = game.Players:GetPlayers()
+        for _, player in ipairs(players) do
+            if player ~= game.Players.LocalPlayer then
+                if player.Character.HumanoidRootPart.Anchored then
+                    player.Character.HumanoidRootPart.Anchored = false
+                else
+                    player.Character.HumanoidRootPart.Anchored = true
+                end
+            end
+        end
+    end
+})
+
+Tab:AddButton({
+    Name = "Exibir Player Esp",
+    Callback = function()
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local playerEspLabel = player.Character:FindFirstChild("PlayerEspLabel")
+                if playerEspLabel then
+                    playerEspLabel:Destroy()
+                else
+                    playerEspLabel = Instance.new("BillboardGui")
+                    playerEspLabel.Name = "PlayerEspLabel"
+                    playerEspLabel.AlwaysOnTop = true
+                    playerEspLabel.Size = UDim2.new(0, 100, 0, 50)
+                    playerEspLabel.StudsOffset = Vector3.new(0, 3, 0)
+                    
+                    local playerEspText = Instance.new("TextLabel", playerEspLabel)
+                    playerEspText.Text = "Player Esp"
+                    playerEspText.TextSize = 10
+                    playerEspText.TextColor3 = Color3.new(1, 1, 1)
+                    playerEspText.Size = UDim2.new(1, 0, 1, 0)
+                    
+                    playerEspLabel.Parent = player.Character
+                    
+                    player.Character.Humanoid.Died:Connect(function()
+                        playerEspLabel:Destroy()
+                    end)
+                end
+            end
+        end
+    end
+})
+
+Tab:AddButton({
+    Name = "Create Ramp - 35°",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character then
+            return
+        end
+        
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart then
+            return
+        end
+        
+        local ramp = Instance.new("Part")
+        ramp.Size = Vector3.new(40, 1, 100)
+        ramp.CFrame = humanoidRootPart.CFrame * CFrame.new(0, 1, 0) 
+        ramp.CFrame = ramp.CFrame * CFrame.Angles(math.rad(35), 0, 0)
+        ramp.Anchored  = true
+        ramp.BrickColor = BrickColor.new("Medium stone grey")
+        ramp.Parent = workspace
+    end
+})
+
+local teleportActive = false
+local currentIndex = 1
+local teleportDelay = 3
+
+local Tab = Window:MakeTab({
+    Name = "Build A Boat For Treasure",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+    Name = "Teleport Options"
+})
+
+local ToggleButton = Section:AddToggle({
+    Name = "Activate Teleport",
+    Callback = function(isActive)
+        if isActive then
+            teleportActive = true
+            currentIndex = 1
+        else
+            teleportActive = false
+        end
+    end
+})
+
+local coordenadas = {
+    CFrame.new(-32.09263229370117, 83.59585571289062, 1373.245849609375),
+    CFrame.new(-42.185340881347656, 87.05211639404297, 2131.14306640625),
+    CFrame.new(-47.93631362915039, 74.01841735839844, 2913.425537109375),
+    CFrame.new(-56.983402252197266, 79.23876953125, 3680.613525390625),
+    CFrame.new(-41.47883605957031, 53.17374801635742, 4451.3193359375),
+    CFrame.new(-59.849403381347656, 69.43704223632812, 5228.951171875),
+    CFrame.new(-62.5048942565918, 62.118534088134766, 5997.16796875),
+    CFrame.new(-59.94519805908203, 50.0681266784668, 6750.72216796875),
+    CFrame.new(-73.48548126220703, 68.01810455322266, 7530.57421875),
+    CFrame.new(-58.1212043762207, 57.716697692871094, 8298.9462890625),
+    CFrame.new(-54.213951110839844, -355.86419677734375, 9491.9755859375)
+}
+
+while true do
+    if teleportActive then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = coordenadas[currentIndex]
+        local block = Instance.new("Part")
+        block.Size = Vector3.new(20, 1, 20)
+        block.Position = coordenadas[currentIndex].Position - Vector3.new(0, 5, 0)
+        block.Anchored = true
+        block.Parent = game.Workspace
+
+        currentIndex = currentIndex + 1
+        if currentIndex > #coordenadas then
+            currentIndex = 1
+        end
+        
+        wait(teleportDelay)
+    else
+        wait(1) 
+    end
+end
+
+local player = game.Players.LocalPlayer
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "malvado_scripts", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+
+local Tab = Window:MakeTab({
+    Name = "Tab 1",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+    Name = "LocalPlayer"
+})
+
+OrionLib:MakeNotification({
+    Name = "Welcome!",
+    Content = "Welcome to my hub!",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+
+Tab:AddButton({
+    Name = "High Speed",
+    Text = "High Speed",
+    Function = function()
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 500
+    end
+})
+  
+
+Tab:AddButton({
+    Name = "High Jumppower",
+    Callback = function()
+        player.Character.Humanoid.JumpPower = 100
+    end
+})
+
+Tab:AddButton({
+    Name = "Low Gravity",
+    Callback = function()
+        game.Workspace.Gravity = 10
+    end
+})
+
+local isInvisible = false
+
+Tab:AddButton({
+    Name = "invisibilidade",
+    Callback = function()
+        isInvisible = not isInvisible
+        for _, part in pairs(player.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = isInvisible and 1 or 0
+                part.CanCollide = not isInvisible
+            elseif part:IsA("Accessory") then
+                part.Handle.Transparency = isInvisible and 1 or 0
+            end
+        end
+    end
+})
+
+Tab:AddButton({
+    Name = "atravessar paredes",
+    Callback = function()
+        for _, part in pairs(player.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+        game:GetService("RunService").Stepped:Connect(function()
+            for _, part in pairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") and part.Position.Y < 0 then
+                    part.CanCollide = true
+                end
+            end
+        end)
+    end
+})
+
+Tab:AddButton({
+    Name = "Btools",
+    Callback = function()
+        local tool = Instance.new("HopperBin", player.Backpack)
+        tool.BinType = Enum.BinType.Hammer
+        local deleteTool = Instance.new("HopperBin", player.Backpack)
+        deleteTool.BinType = Enum.BinType.Clone
+    end
+})
+
+Tab:AddButton({
+    Name = "parar tempo",
+    Callback = function()
+        local players = game.Players:GetPlayers()
+        for _, player in ipairs(players) do
+            if player ~= game.Players.LocalPlayer then
+                if player.Character.HumanoidRootPart.Anchored then
+                    player.Character.HumanoidRootPart.Anchored = false
+                else
+                    player.Character.HumanoidRootPart.Anchored = true
+                end
+            end
+        end
+    end
+})
+
+Tab:AddButton({
+    Name = "Exibir Player Esp",
+    Callback = function()
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local playerEspLabel = player.Character:FindFirstChild("PlayerEspLabel")
+                if playerEspLabel then
+                    playerEspLabel:Destroy()
+                else
+                    playerEspLabel = Instance.new("BillboardGui")
+                    playerEspLabel.Name = "PlayerEspLabel"
+                    playerEspLabel.AlwaysOnTop = true
+                    playerEspLabel.Size = UDim2.new(0, 100, 0, 50)
+                    playerEspLabel.StudsOffset = Vector3.new(0, 3, 0)
+                    
+                    local playerEspText = Instance.new("TextLabel", playerEspLabel)
+                    playerEspText.Text = "Player Esp"
+                    playerEspText.TextSize = 10
+                    playerEspText.TextColor3 = Color3.new(1, 1, 1)
+                    playerEspText.Size = UDim2.new(1, 0, 1, 0)
+                    
+                    playerEspLabel.Parent = player.Character
+                    
+                    player.Character.Humanoid.Died:Connect(function()
+                        playerEspLabel:Destroy()
+                    end)
+                end
+            end
+        end
+    end
+})
+
+Tab:AddButton({
+    Name = "Create Ramp - 35°",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if not character then
+            return
+        end
+        
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart then
+            return
+        end
+        
+        local ramp = Instance.new("Part")
+        ramp.Size = Vector3.new(40, 1, 100)
+        ramp.CFrame = humanoidRootPart.CFrame * CFrame.new(0, 1, 0) 
+        ramp.CFrame = ramp.CFrame * CFrame.Angles(math.rad(35), 0, 0)
+        ramp.Anchored  = true
+        ramp.BrickColor = BrickColor.new("Medium stone grey")
+        ramp.Parent = workspace
+    end
+})
+
+local teleportActive = false
+local currentIndex = 1
+local teleportDelay = 2
+local blockSpawned = false
+local blockDelay = 0
+
+local Tab = Window:MakeTab({
+    Name = "Build A Boat For Treasure",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+    Name = "Teleport Options"
+})
+
+local ToggleButton = Section:AddToggle({
+    Name = "Activate Teleport",
+    Callback = function(isActive)
+        if isActive then
+            teleportActive = true
+            currentIndex = 1 
+            blockSpawned = false
+            blockDelay = tick()
+        else
+            teleportActive = false
+        end
+    end
+})
+
+local coordenadas = {
+    CFrame.new(-32.09263229370117, 83.59585571289062, 1373.245849609375),
+    CFrame.new(-42.185340881347656, 87.05211639404297, 2131.14306640625),
+    CFrame.new(-47.93631362915039, 74.01841735839844, 2913.425537109375),
+    CFrame.new(-56.983402252197266, 79.23876953125, 3680.613525390625),
+    CFrame.new(-41.47883605957031, 53.17374801635742, 4451.3193359375),
+    CFrame.new(-59.849403381347656, 69.43704223632812, 5228.951171875),
+    CFrame.new(-62.5048942565918, 62.118534088134766, 5997.16796875),
+    CFrame.new(-59.94519805908203, 50.0681266784668, 6750.72216796875),
+    CFrame.new(-73.48548126220703, 68.01810455322266, 7530.57421875),
+    CFrame.new(-58.1212043762207, 57.716697692871094, 8298.9462890625),
+    CFrame.new(-54.213951110839844, -355.86419677734375, 9491.9755859375)
+}
+
+while true do
+    if teleportActive then
+        if game.Players.LocalPlayer.Character.Humanoid.Health <= 0 then
+            wait(5) -- Wait for player to respawn
+        else
+            if not blockSpawned and tick() - blockDelay >= 2 then
+                local block = Instance.new("Part")
+                block.Size = Vector3.new(10, 0.1, 10)
+                block.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(0, 5, 0)
+                block.Anchored = true
+                block.Parent = game.Workspace
+                blockSpawned = true
+            end
+
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = coordenadas[currentIndex]
+
+            currentIndex = currentIndex + 1
+            if currentIndex > #coordenadas then
+                currentIndex = 1
+                wait(5) -- Wait for 5 seconds before starting teleporting again
+            end
+
+            wait(teleportDelay)
+        end
+    else
+        wait(3)
+    end
+end
